@@ -9,7 +9,10 @@ on:
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
-
+  
+env:
+  LOGFILE: logs-${{ github.event.repository.owner.login }}-${{ github.event.repository.name }}-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
+  
 jobs:
   Run-Common-CI:
     uses: dm-vdo/vdo-org-actions/.github/workflows/ci.yaml@main
@@ -34,6 +37,7 @@ jobs:
         done
       # Call the Jenkins job
       run-private-tests: true
-      private-tests-action: /permabit/ops/scripts/runJenkinsJob common-github
-      private-tests-action-failure: echo "Private testing failed"
+      private-tests-action: make jenkins
+      private-tests-action-failure: |
+        cp -a logs /permabit/user/bunsen/artifacts/${{ env.LOGFILE }}
     secrets: inherit
